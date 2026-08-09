@@ -96,18 +96,22 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
 if DATABASE_URL.startswith("postgres"):
-    # postgres://user:pass@host:port/dbname
+    # postgres://user:pass@host:port/dbname?sslmode=require
     import urllib.parse as urlparse
 
     url = urlparse.urlparse(DATABASE_URL)
+    query = dict(urlparse.parse_qsl(url.query))
+    # Supabase and most hosted Postgres require TLS.
+    sslmode = query.get("sslmode", "require")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
             "NAME": url.path[1:],
             "USER": url.username,
-            "PASSWORD": url.password,
+            "PASSWORD": urlparse.unquote(url.password or ""),
             "HOST": url.hostname,
             "PORT": url.port or 5432,
+            "OPTIONS": {"sslmode": sslmode},
         }
     }
 else:
