@@ -118,7 +118,13 @@ class AdminLoginView(APIView):
             issue_email_otp(user, EmailOTP.Purpose.ADMIN_LOGIN)
         except Exception:
             return Response(
-                {"detail": "Could not send admin verification email."},
+                {
+                    "detail": (
+                        "Could not send admin verification email. "
+                        "Check EMAIL_HOST_USER / EMAIL_HOST_PASSWORD "
+                        "(Gmail App Password) on the server."
+                    )
+                },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         return Response(
