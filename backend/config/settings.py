@@ -266,25 +266,38 @@ SESSION_IDLE_TIMEOUT_MINUTES = int(os.getenv("SESSION_IDLE_TIMEOUT_MINUTES", "15
 VAULT_IDLE_LOCK_MINUTES = int(os.getenv("VAULT_IDLE_LOCK_MINUTES", "15"))
 
 # ---------------------------------------------------------------------------
-# Email (OTP to Gmail / any mailbox)
-# In DEBUG, emails print to the console. For real Gmail delivery, set SMTP_* .
+# Email (OTP)
+# Render free tier blocks SMTP ports 25/465/587. Prefer Resend HTTPS API:
+#   RESEND_API_KEY=re_...
+#   EMAIL_BACKEND=accounts.resend_backend.ResendEmailBackend
+#   DEFAULT_FROM_EMAIL=KeySafe <onboarding@resend.dev>  (or your verified domain)
+# Local DEBUG defaults to console. Production defaults to SMTP only if no Resend key.
 # ---------------------------------------------------------------------------
-EMAIL_BACKEND = os.getenv(
-    "EMAIL_BACKEND",
-    "django.core.mail.backends.console.EmailBackend"
-    if DEBUG
-    else "django.core.mail.backends.smtp.EmailBackend",
-)
+_resend_key = os.getenv("RESEND_API_KEY", "").strip()
+RESEND_API_KEY = _resend_key
+
+# Prefer Resend when configured — Render free tier blocks SMTP ports.
+# Ignore EMAIL_BACKEND=smtp if a Resend key is present.
+if _resend_key:
+    EMAIL_BACKEND = "accounts.resend_backend.ResendEmailBackend"
+elif os.getenv("EMAIL_BACKEND"):
+    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+elif DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() in ("1", "true", "yes")
-# Fail fast on Render instead of hanging until the proxy returns a bare 500 HTML page.
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "15"))
 DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL",
-    EMAIL_HOST_USER or "KeySafe <noreply@keysafe.local>",
+    "KeySafe <onboarding@resend.dev>"
+    if _resend_key
+    else (EMAIL_HOST_USER or "KeySafe <noreply@keysafe.local>"),
 )
 
 # Default categories seeded per user on registration
