@@ -1,0 +1,2 @@
+# Used when Render Root Directory is set to `backend/`.
+-r ../requirements.txt

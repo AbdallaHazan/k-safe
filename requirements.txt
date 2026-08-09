@@ -11,3 +11,4 @@ djangorestframework-simplejwt>=5.3
 qrcode>=7.4
 webauthn>=2.2
 Pillow>=10.0
+gunicorn>=22.0
