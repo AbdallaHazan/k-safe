@@ -116,13 +116,17 @@ class AdminLoginView(APIView):
             )
         try:
             issue_email_otp(user, EmailOTP.Purpose.ADMIN_LOGIN)
-        except Exception:
+        except Exception as exc:
+            # Surface a short SMTP reason so misconfigured Render env vars
+            # are diagnosable without shell access (no secrets included).
+            reason = str(exc).strip() or exc.__class__.__name__
+            if len(reason) > 180:
+                reason = reason[:177] + "..."
             return Response(
                 {
                     "detail": (
                         "Could not send admin verification email. "
-                        "Check EMAIL_HOST_USER / EMAIL_HOST_PASSWORD "
-                        "(Gmail App Password) on the server."
+                        f"SMTP error: {reason}"
                     )
                 },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
