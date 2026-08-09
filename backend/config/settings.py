@@ -34,11 +34,35 @@ if not _secret_key:
         )
 SECRET_KEY = _secret_key
 
+def _normalize_allowed_host(raw: str) -> str:
+    """Accept bare hosts or full URLs pasted into DJANGO_ALLOWED_HOSTS."""
+    value = raw.strip().strip("\"'")
+    if not value:
+        return ""
+    # Users often paste https://example.com — Django Host checks need the hostname only.
+    if "://" in value:
+        value = value.split("://", 1)[1]
+    value = value.split("/", 1)[0].split("?", 1)[0]
+    # Drop accidental :443 / :80
+    if value.endswith(":443") or value.endswith(":80"):
+        value = value.rsplit(":", 1)[0]
+    return value.strip().lower()
+
+
 ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-    if host.strip()
+    host
+    for host in (
+        _normalize_allowed_host(part)
+        for part in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    )
+    if host
 ]
+
+# Render injects this automatically — include it so DisallowedHost 400s stop
+# even if DJANGO_ALLOWED_HOSTS was mis-set in the dashboard.
+_render_host = _normalize_allowed_host(os.getenv("RENDER_EXTERNAL_HOSTNAME", ""))
+if _render_host and _render_host not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(_render_host)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
