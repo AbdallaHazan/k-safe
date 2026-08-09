@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Verify admin sign-in | KeySafe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { color-scheme: light; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0d2559;
+      font-family: "Poppins", system-ui, sans-serif;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 2.25rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 45px rgba(13, 37, 89, 0.25);
+    }
+    h1 {
+      font-size: 1.15rem;
+      margin: 0 0 0.35rem;
+      color: #101a33;
+    }
+    p {
+      color: #5b6b8c;
+      font-size: 0.9rem;
+      margin: 0 0 1.25rem;
+    }
+    input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.65rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid rgba(16, 26, 51, 0.15);
+      font-size: 1.1rem;
+      letter-spacing: 0.2em;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 0.7rem 0.8rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 0.6rem;
+    }
+    .btn-primary { background: #2f6fed; color: #fff; }
+    .btn-secondary { background: #eef3fc; color: #1c4fce; }
+    .msg-error { background: #fde8ea; color: #e0293f; padding: 0.6rem 0.75rem; border-radius: 10px; font-size: 0.85rem; margin-bottom: 1rem; }
+    .msg-info { background: #e6edfd; color: #1c4fce; padding: 0.6rem 0.75rem; border-radius: 10px; font-size: 0.85rem; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Verify it's you</h1>
+    <p>We sent a 6-digit code to <strong>{{ email_hint }}</strong>. Enter it to finish signing in to the KeySafe system admin.</p>
+
+    {% if error %}<div class="msg-error">{{ error }}</div>{% endif %}
+    {% if info %}<div class="msg-info">{{ info }}</div>{% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}" />
+      <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" autofocus />
+      <button type="submit" class="btn-primary">Verify code</button>
+    </form>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}" />
+      <input type="hidden" name="resend" value="1" />
+      <button type="submit" class="btn-secondary">Resend code</button>
+    </form>
+  </div>
+</body>
+</html>
