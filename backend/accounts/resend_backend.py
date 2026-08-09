@@ -59,12 +59,14 @@ class ResendEmailBackend(BaseEmailBackend):
         if message.reply_to:
             payload["reply_to"] = list(message.reply_to)
 
+        # Resend (Cloudflare) rejects requests without User-Agent as 403/1010.
         request = urllib.request.Request(
             self.api_url,
             data=json.dumps(payload).encode("utf-8"),
             headers={
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
+                "User-Agent": "KeySafe/1.0 (Django ResendEmailBackend)",
             },
             method="POST",
         )
