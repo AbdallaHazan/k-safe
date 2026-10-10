@@ -2028,15 +2028,29 @@ h3 {
 }
 
 /* ==========================================================================
-   KeySafe — Mobile enhancements
-   Paste at the VERY END of your existing CSS (or import it after).
-   No colors changed: only existing variables are used. Original file untouched.
+   KeySafe — Pro UI enhancement layer (v2)
+   Appended AFTER the original rules. Brand colors untouched: only existing
+   variables / existing palette values are used.
+   Covers: icon system, button system, sidebar nav, mobile dock nav,
+   mobile layout, modals as bottom sheets, auth screens.
    ========================================================================== */
 
-/* Safer viewport + no accidental sideways scroll */
+/* --------------------------------------------------------------------------
+   0. Foundations
+   -------------------------------------------------------------------------- */
+:root {
+  --icon-sm: 16px;
+  --icon-md: 18px;
+  --icon-lg: 20px;
+  --tap-min: 2.75rem; /* 44px touch target */
+  --dock-height: 4.25rem;
+  --dock-gap: 0.75rem;
+}
+
 body {
   overflow-x: clip;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
 }
 
 .app-shell {
@@ -2047,94 +2061,318 @@ body {
   height: 100dvh;
 }
 
-/* Narrower sidebar on small laptops / tablets landscape */
-@media (max-width: 1100px) {
-  :root {
-    --sidebar-width: 236px;
-  }
-}
-
-/* Touch devices: no sticky hover "jumps" */
-@media (hover: none) {
-  .nav-link:hover,
-  .btn:not(:disabled):hover,
-  .stat:hover,
-  .metric-card:hover,
-  .item-card:hover,
-  .tile-card:hover,
-  .user-card:hover,
-  .mini-item:hover,
-  .icon-action:hover {
-    transform: none;
-  }
+img,
+svg {
+  max-width: 100%;
 }
 
 /* --------------------------------------------------------------------------
-   ≤ 960px — Navigation becomes a bottom tab bar (thumb-friendly)
+   1. Icon system — one consistent stroke, rounded, crisp
+   -------------------------------------------------------------------------- */
+.nav-link svg,
+.btn svg,
+.icon-btn svg,
+.icon-action svg,
+.metric-icon svg,
+.setting-row-icon svg,
+.empty-state-icon svg,
+.search-field svg,
+.item-card-meta svg {
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.nav-link svg {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+}
+
+.btn svg,
+.icon-btn svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.btn-sm svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.icon-action svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.metric-icon,
+.setting-row-icon {
+  border-radius: var(--radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   2. Button system — consistent heights, tactile feedback, clear focus
+   -------------------------------------------------------------------------- */
+.btn {
+  min-height: 2.65rem;
+  padding: 0.65rem 1.2rem;
+  letter-spacing: 0.005em;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  position: relative;
+}
+
+.btn-sm {
+  min-height: 2.15rem;
+  padding: 0.4rem 0.85rem;
+}
+
+.table .btn {
+  min-height: 2.15rem;
+}
+
+.btn:not(:disabled):active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--accent);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4a84f2 0%, var(--accent) 45%, var(--accent-deep) 100%);
+  box-shadow:
+    0 8px 18px rgba(47, 111, 237, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.btn-secondary {
+  box-shadow: 0 1px 0 rgba(16, 26, 51, 0.04);
+}
+
+.btn-danger {
+  box-shadow:
+    0 8px 18px rgba(224, 41, 63, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.icon-action {
+  width: 2.4rem;
+  height: 2.4rem;
+  touch-action: manipulation;
+}
+
+.icon-action:active {
+  transform: scale(0.94);
+}
+
+.icon-action:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--accent);
+}
+
+.chip {
+  min-height: 2.2rem;
+}
+
+/* --------------------------------------------------------------------------
+   3. Sidebar navigation (desktop / tablet landscape)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1100px) {
+  :root {
+    --sidebar-width: 240px;
+  }
+}
+
+.sidebar {
+  padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.sidebar .brand {
+  padding: 0 0.35rem;
+  margin-bottom: var(--space-6);
+}
+
+.sidebar > nav {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.nav-section-label {
+  margin: 1.35rem 0.9rem 0.55rem;
+  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+}
+
+.nav-link {
+  position: relative;
+  min-height: 2.75rem;
+  padding: 0.6rem 0.9rem;
+  gap: 0.8rem;
+  margin-bottom: 0.2rem;
+  border-radius: var(--radius-sm);
+}
+
+.nav-link svg {
+  opacity: 0.75;
+  transition: opacity var(--duration) var(--ease), transform var(--duration) var(--ease);
+}
+
+.nav-link:hover svg {
+  opacity: 1;
+}
+
+.nav-link:hover {
+  transform: none;
+}
+
+.sidebar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* active indicator bar */
+.sidebar .nav-link.active::before {
+  content: "";
+  position: absolute;
+  left: -0.55rem;
+  top: 22%;
+  bottom: 22%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: #6fa1ff;
+  box-shadow: 0 0 12px rgba(111, 161, 255, 0.6);
+}
+
+.sidebar .nav-link.active svg {
+  opacity: 1;
+  color: #cfe0ff;
+}
+
+.sidebar-footer {
+  margin: var(--space-4) 0 0;
+  padding: 0.85rem 0.9rem;
+  border-top: none;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+}
+
+/* --------------------------------------------------------------------------
+   4. Mobile / tablet — floating dock navigation (≤ 960px)
    -------------------------------------------------------------------------- */
 @media (max-width: 960px) {
   .main {
     padding: var(--space-5) var(--space-4)
-      calc(5.75rem + env(safe-area-inset-bottom, 0px));
+      calc(var(--dock-height) + var(--dock-gap) + 1.75rem + env(safe-area-inset-bottom, 0px));
   }
 
   .mobile-nav {
     position: fixed;
     top: auto;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: 50%;
+    right: auto;
+    bottom: calc(var(--dock-gap) + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    width: calc(100% - 1.5rem);
+    max-width: 620px;
     margin: 0;
-    padding: 0.4rem 0.5rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
-    gap: 0.2rem;
-    border: none;
-    border-top: 1px solid var(--border);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    background: rgba(255, 255, 255, 0.94);
-    box-shadow: 0 -10px 30px rgba(13, 37, 89, 0.12);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
+    padding: 0.4rem;
+    gap: 0.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 22px;
+    background: linear-gradient(160deg, var(--bg) 0%, var(--bg-deep) 100%);
+    box-shadow:
+      0 18px 40px rgba(6, 16, 36, 0.38),
+      0 4px 12px rgba(6, 16, 36, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     z-index: 40;
     overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    animation: dock-in var(--duration-slow) var(--ease) both;
   }
 
   .mobile-nav .nav-link {
-    flex: 1 0 auto;
-    min-width: 4.25rem;
-    min-height: 3.35rem;
+    flex: 1 1 0;
+    min-width: 3.9rem;
+    min-height: 3.4rem;
     flex-direction: column;
     justify-content: center;
-    gap: 0.2rem;
-    padding: 0.4rem 0.55rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.68rem;
+    gap: 0.22rem;
+    padding: 0.45rem 0.4rem;
+    border-radius: 16px;
+    font-size: 0.66rem;
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
     text-align: center;
+    color: rgba(234, 241, 255, 0.62);
+    background: transparent;
+    scroll-snap-align: center;
   }
 
   .mobile-nav .nav-link svg {
-    width: 21px;
-    height: 21px;
+    width: 22px;
+    height: 22px;
     opacity: 1;
   }
 
-  .mobile-nav .nav-link.active {
-    background: var(--accent-soft);
-    color: var(--accent-deep);
-    box-shadow: none;
+  .mobile-nav .nav-link:hover {
+    background: transparent;
+    color: rgba(234, 241, 255, 0.92);
   }
 
   .mobile-nav .nav-link:active {
-    background: var(--accent-soft);
+    transform: scale(0.95);
+  }
+
+  .mobile-nav .nav-link.active,
+  .mobile-nav .nav-link.active:hover {
+    color: #fff;
+    background: linear-gradient(135deg, #4a84f2, var(--accent-deep));
+    box-shadow:
+      0 8px 18px rgba(47, 111, 237, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+}
+
+@keyframes dock-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
   }
 }
 
 /* --------------------------------------------------------------------------
-   ≤ 720px — Phones
+   5. Phones (≤ 720px)
    -------------------------------------------------------------------------- */
 @media (max-width: 720px) {
-  /* Inputs: 16px stops iOS zoom-on-focus; 44px = comfortable tap target */
+  .btn {
+    min-height: var(--tap-min);
+    padding: 0.7rem 1.1rem;
+  }
+
+  .btn-sm,
+  .table .btn {
+    min-height: 2.5rem;
+  }
+
+  .icon-action {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .chip {
+    min-height: 2.5rem;
+  }
+
+  /* 16px stops iOS zoom-on-focus */
   .field input,
   .field textarea,
   .field select,
@@ -2143,15 +2381,12 @@ body {
     min-height: 2.9rem;
   }
 
-  .btn {
-    min-height: 2.75rem;
+  .search-field svg {
+    width: var(--icon-md);
+    height: var(--icon-md);
   }
 
-  .btn-sm {
-    min-height: 2.4rem;
-  }
-
-  /* Page header: title on top, actions full width below */
+  /* Page header */
   .page-head {
     gap: var(--space-4);
     margin-bottom: var(--space-5);
@@ -2174,7 +2409,7 @@ body {
     margin-top: var(--space-5);
   }
 
-  /* Surfaces: tighter padding, softer corners */
+  /* Surfaces */
   .panel {
     padding: 1.15rem;
     border-radius: var(--radius);
@@ -2198,7 +2433,7 @@ body {
     flex: 1 1 calc(50% - 0.5rem);
   }
 
-  /* Stats & metrics */
+  /* Stats */
   .stat-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-3);
@@ -2217,10 +2452,6 @@ body {
   }
 
   /* Toolbar & filters */
-  .toolbar {
-    gap: var(--space-3);
-  }
-
   .toolbar .field,
   .toolbar .btn {
     flex: 1 1 100%;
@@ -2240,9 +2471,9 @@ body {
     overflow-x: auto;
     margin: 0 -0.25rem;
     padding: 0.1rem 0.25rem 0.25rem;
+    width: 100%;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    width: 100%;
   }
 
   .chip-row::-webkit-scrollbar {
@@ -2251,10 +2482,10 @@ body {
 
   .chip {
     flex-shrink: 0;
-    padding: 0.55rem 0.95rem;
+    padding: 0.5rem 0.95rem;
   }
 
-  /* Item cards: content on top, action bar below */
+  /* Cards */
   .item-card {
     padding: 0.9rem;
     gap: 0.75rem 0.85rem;
@@ -2270,30 +2501,17 @@ body {
     border-top: 1px dashed var(--border);
   }
 
-  .icon-action {
-    width: 2.6rem;
-    height: 2.6rem;
-  }
-
-  .icon-action svg {
-    width: 17px;
-    height: 17px;
-  }
-
   .tile-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.7rem;
   }
 
-  .tile-card {
+  .tile-card,
+  .user-card {
     padding: 0.95rem;
   }
 
-  .user-card {
-    padding: 0.9rem;
-  }
-
-  /* Tables: keep scrollable, slightly denser, hint at scroll */
+  /* Tables */
   .table th,
   .table td {
     padding: 0.8rem 0.85rem;
@@ -2309,15 +2527,14 @@ body {
     min-width: 600px;
   }
 
-  /* Settings rows */
+  /* Settings */
   .setting-row-head {
     gap: var(--space-3);
   }
 
   .setting-row-icon {
-    width: 2.35rem;
-    height: 2.35rem;
-    border-radius: 10px;
+    width: 2.4rem;
+    height: 2.4rem;
   }
 
   .setting-row-toggle {
@@ -2336,10 +2553,14 @@ body {
   .empty-state {
     padding: 2rem 1rem;
   }
+
+  .auth-card .btn-primary {
+    min-height: 3rem;
+  }
 }
 
 /* --------------------------------------------------------------------------
-   ≤ 640px — Modals become bottom sheets
+   6. Modals become bottom sheets (≤ 640px)
    -------------------------------------------------------------------------- */
 @media (max-width: 640px) {
   .modal-backdrop {
@@ -2356,7 +2577,6 @@ body {
     overscroll-behavior: contain;
   }
 
-  /* little grab handle */
   .modal::before {
     content: "";
     display: block;
@@ -2391,7 +2611,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   ≤ 900px — Auth screens (login / register)
+   7. Auth screens (≤ 900px)
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
   .auth-layout:has(.auth-showcase) {
@@ -2399,7 +2619,7 @@ body {
   }
 
   .auth-showcase {
-    padding: 1.4rem 1.25rem 3.25rem; /* extra bottom so the card can overlap */
+    padding: 1.4rem 1.25rem 3.25rem;
   }
 
   .auth-showcase-copy h2 {
@@ -2447,5 +2667,32 @@ body {
 
   .tile-grid {
     grid-template-columns: 1fr;
+  }
+
+  .mobile-nav .nav-link {
+    min-width: 3.5rem;
+    font-size: 0.62rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. Touch devices — no sticky hover jumps
+   -------------------------------------------------------------------------- */
+@media (hover: none) {
+  .btn:not(:disabled):hover,
+  .stat:hover,
+  .metric-card:hover,
+  .item-card:hover,
+  .tile-card:hover,
+  .user-card:hover,
+  .mini-item:hover,
+  .icon-action:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-nav {
+    animation: none;
   }
 }
