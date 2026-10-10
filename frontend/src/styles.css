@@ -2305,10 +2305,11 @@ svg {
     gap: 0.15rem;
     padding: 0.3rem 0.25rem 0.2rem;
     border-radius: var(--radius-sm);
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     font-weight: 600;
-    letter-spacing: 0.01em;
+    letter-spacing: 0;
     line-height: 1.1;
+    white-space: nowrap;
     text-align: center;
     color: var(--ink-muted);
     background: transparent;
@@ -2322,7 +2323,7 @@ svg {
     box-sizing: content-box;
     width: 22px;
     height: 22px;
-    padding: 0.28rem 1.05rem;
+    padding: 0.26rem 0.95rem;
     border-radius: 999px;
     opacity: 1;
     stroke-width: 1.8;
@@ -2349,7 +2350,7 @@ svg {
     background: transparent;
     color: var(--accent-deep);
     box-shadow: none;
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .mobile-nav .nav-link.active svg {
@@ -2705,3 +2706,12 @@ svg {
   }
 }
 
+
+/* --------------------------------------------------------------------------
+   9. Small phones — hero buttons stack so labels never wrap
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .page-hero-actions .btn {
+    flex: 1 1 100%;
+  }
+}
